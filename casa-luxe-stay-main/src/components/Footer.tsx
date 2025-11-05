@@ -52,6 +52,13 @@ const Footer = () => {
 
         <div className="border-t border-border mt-12 pt-8 text-center text-muted-foreground">
           <p>&copy; 2025 Casa da Barra. Todos os direitos reservados.</p>
+          <a
+            href="/admin/login"
+            aria-label="Acessar login de administrador"
+            className="inline-block mt-2 text-xs opacity-20 hover:opacity-100 focus:opacity-100 transition-opacity underline-offset-2 hover:underline"
+          >
+            Admin
+          </a>
         </div>
       </div>
     </footer>
