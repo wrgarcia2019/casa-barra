@@ -13,13 +13,12 @@ import { useToast } from "@/hooks/use-toast";
 // Datas reservadas vêm do contexto de configurações
 
 const CalendarSection = () => {
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const { nightlyPrice, isBooked, cleaningFee, getNightlyPrice, selectedDates, setSelectedDates } = useSettings();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
-  const { nightlyPrice, isBooked, cleaningFee, getNightlyPrice } = useSettings();
   const { toast } = useToast();
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -135,14 +134,27 @@ const CalendarSection = () => {
             Escolha Suas Datas
           </h2>
           <p className="text-xl text-muted-foreground">
-            Selecione o período perfeito para sua estadia.
+            Escolha o período ideal para sua estadia.
           </p>
           <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-3xl mx-auto">
-            Para escolher as datas: clique uma vez no dia do check-in e clique novamente no dia do check-out. Se precisar começar de novo, basta clicar em outra data para reiniciar a seleção.
+            Clique no dia do check-in e, em seguida, no dia do check-out. Para reiniciar, basta escolher outra data.
           </p>
           <p className="mt-2 text-sm md:text-base text-muted-foreground max-w-3xl mx-auto">
-            Este calendário é apenas para consulta. Ao selecionar as datas, você pode enviar seus dados para receber os valores e detalhes por e-mail. Nenhuma reserva é feita automaticamente — apenas o administrador confirma.
+            Este calendário é informativo: após selecionar as datas, você pode enviar seus dados para receber o valor e os detalhes por e-mail. A confirmação é feita pelo administrador.
           </p>
+          {selectedDates.length > 0 && (
+            <div className="mt-6 inline-flex items-center gap-3 bg-secondary rounded-lg px-4 py-2">
+              {selectedDates.length === 1 ? (
+                <span className="text-foreground">
+                  Check-in: {format(selectedDates[0], "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} — selecione a data de check-out
+                </span>
+              ) : (
+                <span className="text-foreground font-semibold">
+                  {calculateNights()} noites = {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(calculateTotal())}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -202,16 +214,16 @@ const CalendarSection = () => {
                       
                       <div className="border-t border-border pt-4">
                         <div className="flex justify-between mb-2">
-            <span className="text-muted-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nightlyPrice)} × {calculateNights()} noites (pode variar pelo dia escolhido)</span>
+                          <span className="text-muted-foreground">{calculateNights()} noites</span>
                           <span className="font-semibold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(calculateTotal())}</span>
-                      </div>
+                        </div>
                       <div className="flex justify-between mb-2">
                         <span className="text-muted-foreground">Taxa de limpeza</span>
                         <span className="font-semibold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cleaningFee)}</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-border">
                         <span className="font-bold text-foreground">Total</span>
-                        <span className="font-bold text-xl gradient-ocean bg-clip-text text-transparent">
+                        <span className="font-bold text-xl text-foreground">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(calculateTotal() + cleaningFee)}
                         </span>
                       </div>
@@ -233,7 +245,10 @@ const CalendarSection = () => {
                 <div className="text-center py-8">
                   <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">
-                    Selecione as datas no calendário para ver o valor total
+                    Selecione as datas para ver o valor total.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    O valor por noite pode variar conforme a data. A taxa de limpeza é adicionada ao total.
                   </p>
                 </div>
               )}

@@ -35,6 +35,8 @@ type SettingsContextType = {
   galleryItems: GalleryItem[];
   setGalleryItems: (items: GalleryItem[]) => void;
   getNightlyPrice: (date: Date) => number;
+  selectedDates: Date[];
+  setSelectedDates: (dates: Date[]) => void;
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -61,6 +63,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   const [heroImageUrl, setHeroImageUrlState] = useState<string | null>(null);
   const [galleryItems, setGalleryItemsState] = useState<GalleryItem[]>([]);
   const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
+  const [selectedDates, setSelectedDatesState] = useState<Date[]>([]);
 
   useEffect(() => {
     const savedPrice = localStorage.getItem(PRICE_KEY);
@@ -281,8 +284,10 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       galleryItems,
       setGalleryItems,
       getNightlyPrice,
+      selectedDates,
+      setSelectedDates: (dates: Date[]) => setSelectedDatesState(dates),
     }),
-    [nightlyPrice, bookedDates, cleaningFee, heroTitle, heroSubtitle, heroImageUrl, galleryItems, pricingRules],
+    [nightlyPrice, bookedDates, cleaningFee, heroTitle, heroSubtitle, heroImageUrl, galleryItems, pricingRules, selectedDates],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

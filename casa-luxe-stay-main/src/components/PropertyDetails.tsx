@@ -1,10 +1,12 @@
-import { MapPin, Users, Bed, Bath } from "lucide-react";
+import { MapPin, Users, Bed, Bath, Car } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 const PropertyDetails = () => {
-  const { nightlyPrice } = useSettings();
+  const { nightlyPrice, selectedDates } = useSettings();
   return (
     <section className="py-24 px-4 bg-secondary/20">
       <div className="max-w-7xl mx-auto">
@@ -13,16 +15,16 @@ const PropertyDetails = () => {
           <div className="space-y-8">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-                Casa da Barra em Itapoa
+                Casa da Barra em Itapoá
               </h2>
               <div className="flex items-center gap-2 text-xl text-muted-foreground">
                 <MapPin className="w-5 h-5" />
-                <span>Itapoa, Santa Catarina, Brasil</span>
+                <span>Barra do Sai, Itapoá - SC, Brasil</span>
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="flex gap-6 flex-wrap">
+            <div className="grid md:grid-cols-3 gap-6">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
                   <Users className="w-6 h-6 text-accent" />
@@ -38,7 +40,7 @@ const PropertyDetails = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Quartos</p>
-                  <p className="text-lg font-semibold text-foreground">3 Quartos, sendo 1 suite</p>
+                  <p className="text-lg font-semibold text-foreground">3 quartos, sendo 1 suíte</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -48,6 +50,15 @@ const PropertyDetails = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Banheiros</p>
                   <p className="text-lg font-semibold text-foreground">3</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 md:justify-self-center">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                  <Car className="w-6 h-6 text-accent" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Vagas</p>
+                  <p className="text-lg font-semibold text-foreground">Até 4 veículos</p>
                 </div>
               </div>
             </div>
@@ -72,11 +83,19 @@ Venha conhecer Itapoá e permita-se viver uma experiência única em um dos dest
               <div className="space-y-4 mb-6">
                 <div className="bg-secondary rounded-xl p-4">
                   <p className="text-sm text-muted-foreground mb-1">Check-in</p>
-                  <p className="text-lg font-semibold text-foreground">Selecione as datas</p>
+                  <p className="text-lg font-semibold text-foreground">
+                    {selectedDates.length > 0
+                      ? format(selectedDates[0], "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                      : "Selecione as datas"}
+                  </p>
                 </div>
                 <div className="bg-secondary rounded-xl p-4">
                   <p className="text-sm text-muted-foreground mb-1">Check-out</p>
-                  <p className="text-lg font-semibold text-foreground">Selecione as datas</p>
+                  <p className="text-lg font-semibold text-foreground">
+                    {selectedDates.length === 2
+                      ? format(selectedDates[1], "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                      : "Selecione as datas"}
+                  </p>
                 </div>
               </div>
 

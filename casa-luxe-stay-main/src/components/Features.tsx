@@ -1,4 +1,4 @@
-import { Wifi, Waves, Utensils, Wind, Palmtree, Car } from "lucide-react";
+import { Wifi, Waves, Utensils, Wind, Palmtree, Car, Flame } from "lucide-react";
 
 const features = [
   {
@@ -9,12 +9,12 @@ const features = [
   {
     icon: Utensils,
     title: "Cozinha Integral",
-    description: "Totalmente equipada para 10 pessoas com utensílios, microondas,cafeteira e até um frrezer para as bebidas"
+    description: "Equipada para 10 pessoas: utensílios, micro-ondas, cafeteira e freezer para bebidas"
   },
   {
     icon: Wind,
     title: "Na Quadra do Mar",
-    description: "70 metro da praia, não precisa nem atravessar a rua"
+    description: "A 70 metros da praia — sem precisar atravessar a rua"
   },
   {
     icon: Palmtree,
@@ -24,7 +24,12 @@ const features = [
   {
     icon: Car,
     title: "Estacionamento",
-    description: "Garagem para até 4 veiculos"
+    description: "Garagem coberta para até 4 veículos"
+  },
+  {
+    icon: Flame,
+    title: "Churrasqueira",
+    description: "Espaço externo com churrasqueira para confraternizar"
   }
 ];
 

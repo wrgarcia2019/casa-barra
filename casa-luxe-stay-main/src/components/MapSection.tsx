@@ -25,7 +25,7 @@ const MapSection = () => {
             Localização Privilegiada
           </h2>
           <p className="text-xl text-muted-foreground">
-            Na melhor praia de Itapoa na Barra Do Sai
+            Barra do Sai, Itapoá — bairro tranquilo e próximo da praia
           </p>
         </div>
 
@@ -34,10 +34,10 @@ const MapSection = () => {
           <div className="lg:col-span-2">
             <div className="card-elevated overflow-hidden h-[500px]">
               <iframe
-                title="Mapa - Avenida Dom Henrique II, 2631, Itapoá"
+                title="Mapa - Barra do Sai, Itapoá"
                 src={
                   "https://www.google.com/maps?q=" +
-                  encodeURIComponent("Avenida Dom Henrique II 2631, Itapoá, Santa Catarina, Brasil") +
+                  encodeURIComponent("Barra do Sai, Itapoá, Santa Catarina, Brasil") +
                   "&output=embed"
                 }
                 width="100%"
@@ -68,9 +68,9 @@ const MapSection = () => {
             ))}
             
             <div className="card-elevated p-6 bg-accent/5 border-accent/20">
-              <h4 className="font-semibold mb-2 text-foreground">📍 Endereço</h4>
+              <h4 className="font-semibold mb-2 text-foreground">📍 Bairro</h4>
               <p className="text-sm text-muted-foreground">
-                Avenida Dom Henrique II, 2631<br />
+                Barra do Sai<br />
                 Itapoá, Santa Catarina, Brasil
               </p>
             </div>

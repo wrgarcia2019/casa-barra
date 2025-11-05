@@ -7,11 +7,11 @@ const Footer = () => {
         <div className="grid md:grid-cols-3 gap-12">
           {/* Brand */}
           <div>
-            <h3 className="text-2xl font-bold gradient-ocean bg-clip-text text-transparent mb-4">
+            <h3 className="text-2xl font-bold text-foreground mb-4">
               Casa da Barra
             </h3>
             <p className="text-muted-foreground">
-              Seu refúgio em Itapoa, perto de tudo que você precisa.
+              Seu refúgio em Itapoá, perto de tudo que você precisa.
             </p>
           </div>
 
@@ -31,16 +31,20 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="w-5 h-5 text-primary" />
+                <span className="font-medium text-foreground">E-mail:</span>
                 <span>wrgarcia2003@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="w-5 h-5 text-primary" />
+                <span className="font-medium text-foreground">Telefone/WhatsApp:</span>
                 <span>+55 (47) 99696-0667</span>
-                <span>+55 (47) 996538040</span>
+                <span className="text-muted-foreground">|</span>
+                <span>+55 (47) 99653-8040</span>
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <MapPin className="w-5 h-5 text-primary" />
-                <span>Itapoa, SC, Brasil</span>
+                <span className="font-medium text-foreground">Local:</span>
+                <span>Barra do Sai, Itapoá - SC, Brasil</span>
               </li>
             </ul>
           </div>
