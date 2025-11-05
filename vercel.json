@@ -1,13 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "casa-luxe-stay-main/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "installCommand": "npm install",
-        "buildCommand": "npm run build",
-        "distDir": "casa-luxe-stay-main/dist"
-      }
-    }
-  ]
+  "buildCommand": "npm --prefix casa-luxe-stay-main install && npm --prefix casa-luxe-stay-main run build",
+  "outputDirectory": "casa-luxe-stay-main/dist",
+  "framework": null
 }
