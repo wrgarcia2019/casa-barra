@@ -73,8 +73,9 @@ const AdminDashboard = () => {
     toast({ title: "Intervalo liberado", description: `${format(range.from, "dd/MM/yyyy")} – ${format(range.to, "dd/MM/yyyy")}` });
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    // Aguarda o signOut concluir para evitar abortar a requisição de logout
+    await logout();
     navigate("/");
   };
 

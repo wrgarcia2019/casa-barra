@@ -73,13 +73,41 @@ const CalendarSection = () => {
       return;
     }
 
+    // Preparar dados extras para o template de e-mail (diárias, valores e detalhamento)
+    const days = calculateDays();
+    const subtotal_brl = calculateTotal();
+    const cleaning_fee_brl = typeof cleaningFee === 'number' ? cleaningFee : 0;
+    const total_brl = subtotal_brl + cleaning_fee_brl;
+
+    const price_breakdown = (() => {
+      if (selectedDates.length !== 2) return [] as { date: string; price: number }[];
+      const start = new Date(Date.UTC(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), selectedDates[0].getDate()));
+      const end = new Date(Date.UTC(selectedDates[1].getFullYear(), selectedDates[1].getMonth(), selectedDates[1].getDate()));
+      const rows: { date: string; price: number }[] = [];
+      for (let d = start; d <= end; d = new Date(d.getTime() + 24 * 60 * 60 * 1000)) {
+        rows.push({
+          date: format(new Date(d), 'dd/MM/yyyy'),
+          price: getNightlyPrice(new Date(d)),
+        });
+      }
+      return rows;
+    })();
+
     // Tenta invocar função Edge para enviar e-mail (configure no Supabase)
     try {
       if (!ADMIN_EMAIL) {
         throw new Error("ADMIN_EMAIL ausente. Configure VITE_ADMIN_EMAIL no .env.");
       }
       const { data, error: funcError } = await supabase.functions.invoke("send-inquiry-email", {
-        body: { ...payload, admin_email: ADMIN_EMAIL },
+        body: {
+          ...payload,
+          admin_email: ADMIN_EMAIL,
+          days,
+          subtotal_brl,
+          cleaning_fee_brl,
+          total_brl,
+          price_breakdown,
+        },
       });
       if (funcError) throw funcError;
       if (data && data.sent === false) {
