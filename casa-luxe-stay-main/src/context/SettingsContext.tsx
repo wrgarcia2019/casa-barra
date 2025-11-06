@@ -67,30 +67,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   const [selectedDates, setSelectedDatesState] = useState<Date[]>([]);
 
   useEffect(() => {
-    const savedPrice = localStorage.getItem(PRICE_KEY);
-    const savedBooked = localStorage.getItem(BOOKED_KEY);
-    const savedCleaning = localStorage.getItem(CLEANING_KEY);
-    const savedHeroTitle = localStorage.getItem(HERO_TITLE_KEY);
-    const savedHeroSubtitle = localStorage.getItem(HERO_SUBTITLE_KEY);
-    const savedHeroImageUrl = localStorage.getItem(HERO_IMAGE_URL_KEY);
-    const savedGalleryItems = localStorage.getItem(GALLERY_ITEMS_KEY);
-    if (savedPrice) setNightlyPriceState(Number(savedPrice));
-    if (savedBooked) {
-      try {
-        const parsed = JSON.parse(savedBooked);
-        if (Array.isArray(parsed)) setBookedDates(parsed);
-      } catch {}
-    }
-    if (savedCleaning) setCleaningFeeState(Number(savedCleaning));
-    if (savedHeroTitle) setHeroTitleState(savedHeroTitle);
-    if (savedHeroSubtitle) setHeroSubtitleState(savedHeroSubtitle);
-    if (savedHeroImageUrl) setHeroImageUrlState(savedHeroImageUrl);
-    if (savedGalleryItems) {
-      try {
-        const parsed = JSON.parse(savedGalleryItems);
-        if (Array.isArray(parsed)) setGalleryItemsState(parsed as GalleryItem[]);
-      } catch {}
-    }
     // Carregar defaults do Supabase (app_settings) se existirem
     (async () => {
       try {
@@ -149,7 +125,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setNightlyPrice = async (price: number) => {
     setNightlyPriceState(price);
-    localStorage.setItem(PRICE_KEY, String(price));
     // Persistir no Supabase se tabela existir
     try {
       await supabase.from('app_settings').upsert({ id: 'default', nightly_price: price }, { onConflict: 'id' });
@@ -161,7 +136,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     setBookedDates((prev) => {
       const exists = prev.includes(iso);
       const next = exists ? prev.filter((d) => d !== iso) : [...prev, iso];
-      localStorage.setItem(BOOKED_KEY, JSON.stringify(next));
       return next;
     });
     // Persistir no Supabase (RLS permite escrita apenas autenticada)
@@ -201,7 +175,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setCleaningFee = async (fee: number) => {
     setCleaningFeeState(fee);
-    localStorage.setItem(CLEANING_KEY, String(fee));
     try {
       await supabase.from('app_settings').upsert({ id: 'default', cleaning_fee: fee }, { onConflict: 'id' });
     } catch {}
@@ -209,7 +182,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setHeroTitle = async (t: string) => {
     setHeroTitleState(t);
-    localStorage.setItem(HERO_TITLE_KEY, t);
     // Persistir no Supabase (upsert na linha 'default')
     await supabase.from('hero_settings').upsert({
       id: 'default',
@@ -221,7 +193,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setHeroSubtitle = async (t: string) => {
     setHeroSubtitleState(t);
-    localStorage.setItem(HERO_SUBTITLE_KEY, t);
     await supabase.from('hero_settings').upsert({
       id: 'default',
       title: heroTitle,
@@ -232,8 +203,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setHeroImageUrl = async (url: string | null) => {
     setHeroImageUrlState(url);
-    if (url) localStorage.setItem(HERO_IMAGE_URL_KEY, url);
-    else localStorage.removeItem(HERO_IMAGE_URL_KEY);
     await supabase.from('hero_settings').upsert({
       id: 'default',
       title: heroTitle,
@@ -244,7 +213,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setGalleryItems = async (items: GalleryItem[]) => {
     setGalleryItemsState(items);
-    localStorage.setItem(GALLERY_ITEMS_KEY, JSON.stringify(items));
     // Persistir no Supabase (replace seguro: apagar existentes por id e inserir novos)
     const { data: existing, error: selErr } = await supabase
       .from('gallery_items')
@@ -275,7 +243,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       const set = new Set(prev);
       days.forEach((iso) => set.add(iso));
       const next = Array.from(set);
-      localStorage.setItem(BOOKED_KEY, JSON.stringify(next));
       return next;
     });
     // Persistir em lote no Supabase
@@ -296,7 +263,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     }
     setBookedDates((prev) => {
       const next = prev.filter((iso) => !days.includes(iso));
-      localStorage.setItem(BOOKED_KEY, JSON.stringify(next));
       return next;
     });
     // Remover em lote no Supabase
