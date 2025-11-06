@@ -101,11 +101,13 @@ const CalendarSection = () => {
     setMessage("");
   };
 
-  const calculateNights = () => {
+  const calculateDays = () => {
     if (selectedDates.length === 2) {
-      const diffTime = Math.abs(selectedDates[1].getTime() - selectedDates[0].getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
+      const start = new Date(Date.UTC(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), selectedDates[0].getDate()));
+      const end = new Date(Date.UTC(selectedDates[1].getFullYear(), selectedDates[1].getMonth(), selectedDates[1].getDate()));
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const diff = Math.floor((end.getTime() - start.getTime()) / msPerDay);
+      return diff + 1; // diária: inclui o dia de checkout
     }
     return 0;
   };
@@ -115,7 +117,7 @@ const CalendarSection = () => {
       const start = new Date(Date.UTC(selectedDates[0].getFullYear(), selectedDates[0].getMonth(), selectedDates[0].getDate()));
       const end = new Date(Date.UTC(selectedDates[1].getFullYear(), selectedDates[1].getMonth(), selectedDates[1].getDate()));
       let sum = 0;
-      for (let d = start; d < end; d = new Date(d.getTime() + 24 * 60 * 60 * 1000)) {
+      for (let d = start; d <= end; d = new Date(d.getTime() + 24 * 60 * 60 * 1000)) {
         sum += getNightlyPrice(new Date(d));
       }
       return sum;
@@ -150,7 +152,7 @@ const CalendarSection = () => {
                 </span>
               ) : (
                 <span className="text-foreground font-semibold">
-                  {calculateNights()} noites = {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(calculateTotal())}
+                  {calculateDays()} diárias = {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(calculateTotal())}
                 </span>
               )}
             </div>
@@ -214,7 +216,7 @@ const CalendarSection = () => {
                       
                       <div className="border-t border-border pt-4">
                         <div className="flex justify-between mb-2">
-                          <span className="text-muted-foreground">{calculateNights()} noites</span>
+                          <span className="text-muted-foreground">{calculateDays()} diárias</span>
                           <span className="font-semibold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(calculateTotal())}</span>
                         </div>
                       <div className="flex justify-between mb-2">
@@ -248,10 +250,10 @@ const CalendarSection = () => {
                     Selecione as datas para ver o valor total.
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    O valor por noite pode variar conforme a data. A taxa de limpeza é adicionada ao total.
+                    O valor por diária pode variar conforme a data. A taxa de limpeza é adicionada ao total.
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Preço padrão: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nightlyPrice)} / noite • Taxa de limpeza: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cleaningFee)}
+                    Preço padrão: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nightlyPrice)} / diária • Taxa de limpeza: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cleaningFee)}
                   </p>
                 </div>
               )}

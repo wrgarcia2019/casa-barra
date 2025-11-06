@@ -53,7 +53,7 @@ const AdminDashboard = () => {
 
   const savePrice = async () => {
     await setNightlyPrice(tempPrice);
-    toast({ title: "Preço atualizado", description: `${currency.format(tempPrice)} por noite` });
+    toast({ title: "Preço atualizado", description: `${currency.format(tempPrice)} por diária` });
   };
 
   const saveCleaning = async () => {
@@ -88,7 +88,7 @@ const AdminDashboard = () => {
 
         {/* Preço */}
         <div className="card-elevated p-6">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Preço por noite</h2>
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Preço por diária</h2>
           <div className="flex items-center gap-4">
             <input
               type="number"
