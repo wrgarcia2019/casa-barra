@@ -250,6 +250,9 @@ const CalendarSection = () => {
                   <p className="text-sm text-muted-foreground mt-2">
                     O valor por noite pode variar conforme a data. A taxa de limpeza é adicionada ao total.
                   </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Preço padrão: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(nightlyPrice)} / noite • Taxa de limpeza: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cleaningFee)}
+                  </p>
                 </div>
               )}
             </div>

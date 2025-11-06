@@ -12,7 +12,7 @@ import { DateRange } from "react-day-picker";
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 const AdminDashboard = () => {
-  const { nightlyPrice, setNightlyPrice, bookedDates, isBooked, cleaningFee, setCleaningFee, addBookedRange, removeBookedRange, heroTitle, setHeroTitle, heroSubtitle, setHeroSubtitle, heroImageUrl, setHeroImageUrl, galleryItems, setGalleryItems } = useSettings();
+  const { nightlyPrice, setNightlyPrice, bookedDates, isBooked, cleaningFee, setCleaningFee, addBookedRange, removeBookedRange, heroTitle, setHeroTitle, heroSubtitle, setHeroSubtitle, heroImageUrl, setHeroImageUrl, galleryItems, setGalleryItems, refreshPricingRules } = useSettings();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -51,25 +51,25 @@ const AdminDashboard = () => {
     })();
   }, []);
 
-  const savePrice = () => {
-    setNightlyPrice(tempPrice);
+  const savePrice = async () => {
+    await setNightlyPrice(tempPrice);
     toast({ title: "Preço atualizado", description: `${currency.format(tempPrice)} por noite` });
   };
 
-  const saveCleaning = () => {
-    setCleaningFee(tempCleaning);
+  const saveCleaning = async () => {
+    await setCleaningFee(tempCleaning);
     toast({ title: "Taxa de limpeza atualizada", description: `${currency.format(tempCleaning)}` });
   };
 
-  const markRangeBooked = () => {
+  const markRangeBooked = async () => {
     if (!range?.from || !range?.to) return;
-    addBookedRange(range.from, range.to);
+    await addBookedRange(range.from, range.to);
     toast({ title: "Intervalo marcado como ocupado", description: `${format(range.from, "dd/MM/yyyy")} – ${format(range.to, "dd/MM/yyyy")}` });
   };
 
-  const unmarkRangeBooked = () => {
+  const unmarkRangeBooked = async () => {
     if (!range?.from || !range?.to) return;
-    removeBookedRange(range.from, range.to);
+    await removeBookedRange(range.from, range.to);
     toast({ title: "Intervalo liberado", description: `${format(range.from, "dd/MM/yyyy")} – ${format(range.to, "dd/MM/yyyy")}` });
   };
 
@@ -411,6 +411,7 @@ const AdminDashboard = () => {
                     toast({ title: 'Regra salva' });
                     const { data } = await supabase.from('pricing_rules').select('id,scope,specific_date,year,month,week,price');
                     setRules(data || []);
+                    await refreshPricingRules();
                   }}
                   className="gradient-ocean text-white px-4 py-2 rounded-lg font-semibold"
                 >Salvar regra</button>
@@ -444,6 +445,7 @@ const AdminDashboard = () => {
                             if (error) { toast({ title: 'Erro ao remover', description: error.message }); return; }
                             setRules((prev) => prev.filter((x) => x.id !== r.id));
                             toast({ title: 'Regra removida' });
+                            await refreshPricingRules();
                           }}
                           className="bg-secondary px-3 py-1 rounded-md text-sm"
                         >Remover</button>
@@ -491,6 +493,7 @@ const AdminDashboard = () => {
                                 toast({ title: 'Regra atualizada' });
                                 const { data } = await supabase.from('pricing_rules').select('id,scope,specific_date,year,month,week,price');
                                 setRules(data || []);
+                                await refreshPricingRules();
                                 setEditingRuleId(null);
                               }}
                               className="gradient-ocean text-white px-3 py-2 rounded-md"

@@ -24,6 +24,7 @@ type SettingsContextType = {
   isBooked: (date: Date) => boolean;
   cleaningFee: number;
   setCleaningFee: (fee: number) => void;
+  refreshPricingRules: () => Promise<void>;
   addBookedRange: (start: Date, end: Date) => void;
   removeBookedRange: (start: Date, end: Date) => void;
   heroTitle: string;
@@ -90,6 +91,21 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
         if (Array.isArray(parsed)) setGalleryItemsState(parsed as GalleryItem[]);
       } catch {}
     }
+    // Carregar defaults do Supabase (app_settings) se existirem
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('app_settings')
+          .select('id,nightly_price,cleaning_fee')
+          .eq('id', 'default')
+          .limit(1);
+        if (!error && data && data.length) {
+          const row = data[0] as any;
+          if (row?.nightly_price != null) setNightlyPriceState(Number(row.nightly_price));
+          if (row?.cleaning_fee != null) setCleaningFeeState(Number(row.cleaning_fee));
+        }
+      } catch {}
+    })();
     // Buscar conteúdo (Hero/Galeria) do Supabase
     (async () => {
       // Hero settings: pega a configuração mais recente ou a 'default'
@@ -116,29 +132,31 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       }
 
       // Pricing rules
-      const { data: rules, error: rulesErr } = await supabase
-        .from('pricing_rules')
-        .select('scope,specific_date,year,month,week,price');
-      if (!rulesErr && rules) {
-        const mapped = rules.map((r: any) => ({
-          scope: r.scope,
-          specific_date: r.specific_date,
-          year: r.year,
-          month: r.month,
-          week: r.week,
-          price: Number(r.price),
-        })) as PricingRule[];
-        setPricingRules(mapped);
-      }
+      await refreshPricingRules();
+      // Booked dates
+      try {
+        const { data: booked, error: bookedErr } = await supabase
+          .from('booked_dates')
+          .select('date')
+          .order('date', { ascending: true });
+        if (!bookedErr && booked) {
+          const isoDates = booked.map((b: any) => String(b.date));
+          if (isoDates.length) setBookedDates(isoDates);
+        }
+      } catch {}
     })();
   }, []);
 
-  const setNightlyPrice = (price: number) => {
+  const setNightlyPrice = async (price: number) => {
     setNightlyPriceState(price);
     localStorage.setItem(PRICE_KEY, String(price));
+    // Persistir no Supabase se tabela existir
+    try {
+      await supabase.from('app_settings').upsert({ id: 'default', nightly_price: price }, { onConflict: 'id' });
+    } catch {}
   };
 
-  const toggleBookedDate = (date: Date) => {
+  const toggleBookedDate = async (date: Date) => {
     const iso = toISO(date);
     setBookedDates((prev) => {
       const exists = prev.includes(iso);
@@ -146,6 +164,15 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       localStorage.setItem(BOOKED_KEY, JSON.stringify(next));
       return next;
     });
+    // Persistir no Supabase (RLS permite escrita apenas autenticada)
+    try {
+      const exists = bookedDates.includes(iso);
+      if (exists) {
+        await supabase.from('booked_dates').delete().eq('date', iso);
+      } else {
+        await supabase.from('booked_dates').upsert({ date: iso }, { onConflict: 'date' });
+      }
+    } catch {}
   };
 
   const isBooked = (date: Date) => bookedDates.includes(toISO(date));
@@ -172,9 +199,12 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     return nightlyPrice;
   };
 
-  const setCleaningFee = (fee: number) => {
+  const setCleaningFee = async (fee: number) => {
     setCleaningFeeState(fee);
     localStorage.setItem(CLEANING_KEY, String(fee));
+    try {
+      await supabase.from('app_settings').upsert({ id: 'default', cleaning_fee: fee }, { onConflict: 'id' });
+    } catch {}
   };
 
   const setHeroTitle = async (t: string) => {
@@ -234,7 +264,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  const addBookedRange = (start: Date, end: Date) => {
+  const addBookedRange = async (start: Date, end: Date) => {
     const s = new Date(Date.UTC(start.getFullYear(), start.getMonth(), start.getDate()));
     const e = new Date(Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()));
     const days: string[] = [];
@@ -248,9 +278,16 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       localStorage.setItem(BOOKED_KEY, JSON.stringify(next));
       return next;
     });
+    // Persistir em lote no Supabase
+    try {
+      const payload = days.map((iso) => ({ date: iso }));
+      if (payload.length) {
+        await supabase.from('booked_dates').upsert(payload, { onConflict: 'date' });
+      }
+    } catch {}
   };
 
-  const removeBookedRange = (start: Date, end: Date) => {
+  const removeBookedRange = async (start: Date, end: Date) => {
     const s = new Date(Date.UTC(start.getFullYear(), start.getMonth(), start.getDate()));
     const e = new Date(Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()));
     const days: string[] = [];
@@ -262,6 +299,31 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       localStorage.setItem(BOOKED_KEY, JSON.stringify(next));
       return next;
     });
+    // Remover em lote no Supabase
+    try {
+      if (days.length) {
+        await supabase.from('booked_dates').delete().in('date', days);
+      }
+    } catch {}
+  };
+
+  const refreshPricingRules = async () => {
+    try {
+      const { data: rules, error: rulesErr } = await supabase
+        .from('pricing_rules')
+        .select('scope,specific_date,year,month,week,price');
+      if (!rulesErr && rules) {
+        const mapped = rules.map((r: any) => ({
+          scope: r.scope,
+          specific_date: r.specific_date,
+          year: r.year,
+          month: r.month,
+          week: r.week,
+          price: Number(r.price),
+        })) as PricingRule[];
+        setPricingRules(mapped);
+      }
+    } catch {}
   };
 
   const value = useMemo(
@@ -273,6 +335,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       isBooked,
       cleaningFee,
       setCleaningFee,
+      refreshPricingRules,
       addBookedRange,
       removeBookedRange,
       heroTitle,
