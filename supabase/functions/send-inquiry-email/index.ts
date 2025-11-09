@@ -1,4 +1,5 @@
 // deno-lint-ignore-file
+/// <reference path="./types.d.ts" />
 import { Resend } from "npm:resend@0.17.2";
 
 // Cabeçalhos CORS (em dev, "*" é aceitável; em prod use seu domínio)

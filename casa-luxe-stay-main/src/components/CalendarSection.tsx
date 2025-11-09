@@ -260,7 +260,7 @@ const CalendarSection = () => {
                       </div>
                       
                       <button onClick={handleOpenInquiry} className="w-full gradient-ocean text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all">
-                        Verificar Disponibilidade
+                        Solicitar informações, preços e disponibilidade
                       </button>
                     </>
                   )}
